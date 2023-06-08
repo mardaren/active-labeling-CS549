@@ -1,0 +1,3 @@
+dataset: tweet-eval
+model: classifier-unc
+tokenizer: bert-base-uncased
