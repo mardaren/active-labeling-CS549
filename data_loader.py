@@ -1,11 +1,10 @@
 import numpy as np
 import pandas as pd
 from transformers import AutoTokenizer
-from sklearn.preprocessing import MinMaxScaler
-from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk import WordNetLemmatizer
 from nltk.stem.porter import PorterStemmer
 import re
+from ast import literal_eval
 
 class DataLoader:
 
@@ -38,8 +37,12 @@ class DataLoader:
             print("READ ERROR")
             exit(1)
 
-        self.data_text = pd.read_csv(folder_name, index_col=0).sample(50000)  # .sample(frac=1)
-        self.labels = self.data_text.pop('label').to_numpy().astype(int)  # .reshape(-1, 1)
+        self.data_text = pd.read_csv(folder_name, index_col=0).sample(frac=1)
+        if dataset_name == 'tweet-topic':
+            self.labels = self.data_text.pop('label').to_numpy()
+            self.labels = np.array([literal_eval(sample) for sample in self.labels])
+        else:
+            self.labels = self.data_text.pop('label').to_numpy().astype(int)
 
     def lemmatize(self):
         lemmatized_text = []
@@ -60,7 +63,6 @@ class DataLoader:
             emb_raw = embeddings_raw[idx]
             embedding = emb_raw.ids
             embedding = (np.array(embedding) / 50000).tolist()
-            # embedding.extend(emb_raw.attention_mask)
             embeddings.append(embedding)
 
         self.embeddings = np.array(embeddings)
